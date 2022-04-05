@@ -343,8 +343,11 @@ GLViewImpl* GLViewImpl::create(std::string_view viewName, bool resizable)
     return nullptr;
 }
 
-GLViewImpl* GLViewImpl::createWithRect(std::string_view viewName, Rect rect, float frameZoomFactor, bool resizable)
+GLViewImpl* GLViewImpl::createWithRect(std::string_view viewName, Rect rect,void (*injerect)(), float frameZoomFactor, bool resizable)
 {
+    if(injerect != nullptr){
+        injerect();
+    }
     auto ret = new GLViewImpl;
     if (ret->initWithRect(viewName, rect, frameZoomFactor, resizable))
     {
