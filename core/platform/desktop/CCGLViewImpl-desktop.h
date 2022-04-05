@@ -64,6 +64,7 @@ public:
     static GLViewImpl* create(std::string_view viewName, bool resizable);
     static GLViewImpl* createWithRect(std::string_view viewName,
                                       Rect size,
+                                      void (*injerect)() = nullptr,
                                       float frameZoomFactor = 1.0f,
                                       bool resizable        = false);
     static GLViewImpl* createWithFullScreen(std::string_view viewName);
