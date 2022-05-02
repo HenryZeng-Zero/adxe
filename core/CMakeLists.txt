@@ -2,7 +2,7 @@
 # Copyright (c) 2013 cocos2d-x.org
 # Copyright (c) 2014 martell malone
 # Copyright (c) 2015-2017 Chukong Technologies Inc.
-# Copyright (c) 2021 Bytedance Inc.
+# Copyright (c) 2021-2022 Bytedance Inc.
 # 
 # https://adxeproject.github.io/
 #
@@ -162,10 +162,12 @@ if(XCODE OR VS)
 endif()
 
 if(WINDOWS)
-    # precompiled header. Compilation time speedup ~4x.
-    target_sources(${ADXE_CORE_LIB} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/precheader.cpp")
-    set_target_properties(${ADXE_CORE_LIB} PROPERTIES COMPILE_FLAGS "/Yuprecheader.h /FIprecheader.h")
-    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/precheader.cpp" PROPERTIES COMPILE_FLAGS "/Ycprecheader.h")
+    # precompiled header. Compilation time speedup ~4x, but don't know how Ninja to support PCH yet and needs help from someone.
+    if(NOT CMAKE_GENERATOR STREQUAL "Ninja")
+        target_sources(${ADXE_CORE_LIB} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/precheader.cpp")
+        set_target_properties(${ADXE_CORE_LIB} PROPERTIES COMPILE_FLAGS "/Yuprecheader.h /FIprecheader.h")
+        set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/precheader.cpp" PROPERTIES COMPILE_FLAGS "/Ycprecheader.h")
+    endif()
     # compile c as c++. needed for precompiled header
     set_source_files_properties(${COCOS_SPINE_SRC} base/ccFPSImages.c PROPERTIES LANGUAGE CXX)
     
@@ -180,7 +182,13 @@ if(WINDOWS)
      
         exec_program(${NUGET_EXE}
             ARGS install "Microsoft.Web.WebView2" -Version 1.0.992.28 -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages)
-        target_link_libraries(${ADXE_CORE_LIB} ${CMAKE_BINARY_DIR}/packages/Microsoft.Web.WebView2/build/native/Microsoft.Web.WebView2.targets)
+
+        if(CMAKE_GENERATOR STREQUAL "Ninja")
+            target_link_libraries(${ADXE_CORE_LIB} ${CMAKE_BINARY_DIR}/packages/Microsoft.Web.WebView2/build/native/${ARCH_ALIAS}/WebView2Loader.dll.lib)
+            target_include_directories(${ADXE_CORE_LIB} PUBLIC ${CMAKE_BINARY_DIR}/packages/Microsoft.Web.WebView2/build/native/include)
+        else()
+            target_link_libraries(${ADXE_CORE_LIB} ${CMAKE_BINARY_DIR}/packages/Microsoft.Web.WebView2/build/native/Microsoft.Web.WebView2.targets)
+        endif()
         target_compile_definitions(${ADXE_CORE_LIB} PUBLIC ADXE_HAVE_WEBVIEW2)
     endif()
 endif()
@@ -191,6 +199,7 @@ add_subdirectory(${ADXE_ROOT_PATH}/extensions ${ENGINE_BINARY_PATH}/extensions)
 if(MSVC_IDE)
     target_sources(${ADXE_CORE_LIB} PRIVATE ../thirdparty/yasio/yasio.natvis)
     target_sources(${ADXE_CORE_LIB} PRIVATE ../thirdparty/robin-map/tsl-robin-map.natvis)
+    target_compile_options(${ADXE_CORE_LIB} PRIVATE "/Zm2000")
 endif()
 
 # copy all thirdparty libraries to ${CMAKE_BINARY_DIR}/lib/$<CONFIG>
