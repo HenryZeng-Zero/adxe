@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(APP_NAME cpp-tests)
+set(APP_NAME cpp_tests)
 
 
 # "too large PDB" error often occurs in cpp-tests when using default "/Zi"
@@ -45,8 +45,6 @@ if(APPLE OR VS)
 endif()
 
 if(ANDROID)
-    # change APP_NAME to the share library name for Android, it's value depend on AndroidManifest.xml
-    set(APP_NAME cpp_tests)
     list(APPEND GAME_HEADER
          Classes/JNITest/JNITest.h
          )
@@ -569,7 +567,7 @@ if(APPLE)
         set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/proj.mac/Info.plist")
     elseif(IOS)
         set_target_properties(${APP_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/proj.ios/Info.plist")
-        set_xcode_property(${APP_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon-${APP_NAME}")
+        set_xcode_property(${APP_NAME} ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon")
     endif()
 
     # For code-signing, set the DEVELOPMENT_TEAM:
